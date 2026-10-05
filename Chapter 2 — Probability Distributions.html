@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chapter 2 — Probability Distributions</title>
+  <style>
+    :root {
+      --navy: #132b3a;
+      --blue: #176b87;
+      --cyan: #45b6bd;
+      --coral: #eb7657;
+      --gold: #e8b54b;
+      --paper: #f3f7f6;
+      --white: #fff;
+      --ink: #17313e;
+      --muted: #5f747c;
+      --line: #d7e3e2;
+      --green: #39785d;
+      --shadow: 0 14px 38px rgba(19,43,58,.08);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Trebuchet MS", Arial, sans-serif;
+      line-height: 1.6;
+    }
+    button, input { font: inherit; }
+    button:focus-visible, input:focus-visible, a:focus-visible {
+      outline: 3px solid var(--gold);
+      outline-offset: 3px;
+    }
+    .hero {
+      background: var(--navy);
+      color: white;
+      padding: 56px 24px 48px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero:after {
+      content: "";
+      width: 330px;
+      height: 330px;
+      border: 1px solid rgba(69,182,189,.35);
+      border-radius: 50%;
+      position: absolute;
+      right: -80px;
+      top: -145px;
+      box-shadow: 0 0 0 35px rgba(69,182,189,.06),
+                  0 0 0 75px rgba(69,182,189,.04);
+    }
+    .hero-inner, main {
+      max-width: 1100px;
+      margin: auto;
+    }
+    .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: .13em;
+      color: var(--cyan);
+      font-size: .78rem;
+      font-weight: 800;
+    }
+    h1, h2, h3 { line-height: 1.2; }
+    h1 {
+      max-width: 760px;
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      margin: 12px 0;
+      letter-spacing: -.04em;
+    }
+    .hero p { max-width: 680px; color: #d9e8e9; font-size: 1.1rem; }
+    main { padding: 28px 22px 80px; }
+    section {
+      margin: 30px 0;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: clamp(20px, 4vw, 38px);
+      box-shadow: var(--shadow);
+      scroll-margin-top: 20px;
+    }
+    h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); margin: 0 0 12px; }
+    h3 { font-size: 1.2rem; margin: 24px 0 8px; }
+    p { margin: 10px 0; }
+    .lead { color: var(--muted); font-size: 1.08rem; max-width: 820px; }
+    .tag {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 4px 11px;
+      background: #e5f4f2;
+      color: #20656a;
+      font-size: .78rem;
+      font-weight: 800;
+      margin: 0 6px 8px 0;
+    }
+    .callout {
+      border-left: 4px solid var(--cyan);
+      background: #eef8f7;
+      padding: 15px 18px;
+      border-radius: 0 12px 12px 0;
+      margin: 18px 0;
+    }
+    .callout strong { color: var(--navy); }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      align-items: start;
+    }
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px;
+      background: #fbfdfc;
+    }
+    .controls { display: grid; gap: 14px; }
+    .control label {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-weight: 700;
+    }
+    input[type="range"] { width: 100%; accent-color: var(--blue); }
+    .value {
+      color: var(--blue);
+      font-variant-numeric: tabular-nums;
+      font-weight: 800;
+    }
+    .formula {
+      background: var(--navy);
+      color: #f4fbfb;
+      border-radius: 12px;
+      padding: 16px;
+      overflow-wrap: anywhere;
+      font-family: Georgia, serif;
+      font-size: 1.05rem;
+      margin: 12px 0;
+    }
+    .formula small {
+      display: block;
+      color: #a9ced0;
+      font-family: "Trebuchet MS", Arial, sans-serif;
+      font-size: .82rem;
+      margin-top: 7px;
+    }
+    .result {
+      font-size: 1.7rem;
+      color: var(--blue);
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+    }
+    .chart-wrap {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      background: #fff;
+      overflow: hidden;
+    }
+    canvas { display: block; width: 100%; height: 290px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-variant-numeric: tabular-nums;
+    }
+    th, td {
+      padding: 9px 10px;
+      border-bottom: 1px solid var(--line);
+      text-align: right;
+    }
+    th:first-child, td:first-child { text-align: left; }
+    th { background: #edf5f4; color: var(--navy); }
+    .scroll-table { overflow-x: auto; }
+    .bar-row {
+      display: grid;
+      grid-template-columns: 60px 1fr 70px;
+      align-items: center;
+      gap: 8px;
+      margin: 8px 0;
+      font-variant-numeric: tabular-nums;
+    }
+    .bar-track { height: 14px; background: #e7eeee; border-radius: 8px; overflow: hidden; }
+    .bar-fill { height: 100%; background: var(--cyan); border-radius: inherit; transition: width .25s; }
+    .button-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+    button {
+      border: 1px solid #b9cecf;
+      border-radius: 9px;
+      color: var(--navy);
+      background: white;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    button:hover, button.active { background: var(--blue); color: white; border-color: var(--blue); }
+    .step {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 12px;
+      margin: 12px 0;
+      align-items: start;
+    }
+    .step-num {
+      width: 30px; height: 30px;
+      display: grid; place-items: center;
+      border-radius: 50%;
+      background: var(--gold);
+      font-weight: 900;
+    }
+    .muted { color: var(--muted); }
+    .quiz-option {
+      display: block;
+      text-align: left;
+      width: 100%;
+      margin: 8px 0;
+    }
+    .feedback { min-height: 28px; font-weight: 800; }
+    .good { color: var(--green); }
+    .bad { color: #a34838; }
+    .footer { text-align: center; color: var(--muted); padding: 14px; }
+    @media (max-width: 760px) {
+      .grid { grid-template-columns: 1fr; }
+      section { padding: 20px; }
+      canvas { height: 250px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *:before, *:after { scroll-behavior: auto !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+<header class="hero">
+  <div class="hero-inner">
+    <div class="eyebrow">Statistics · Chapter 2</div>
+    <h1>Probability distributions: from real counts to useful models</h1>
+    <p>Start with actual orders, then explore how Normal, Binomial, and Poisson distributions describe uncertainty—and how to choose one for a business question.</p>
+  </div>
+</header>
+
+<main>
+  <section id="map">
+    <span class="tag">Start here</span>
+    <h2>What is a probability distribution?</h2>
+    <p class="lead">A probability distribution is a map from possible outcomes to their probabilities. It tells us what values a random variable can take and how likely each value is.</p>
+    <div class="callout"><strong>Think of it as a forecast of variation.</strong> It does not usually tell you exactly what will happen next. It describes the range of outcomes and how probability is spread across that range.</div>
+
+    <h3>Begin with 10 days of order counts</h3>
+    <p>A small online shop records how many orders arrive each day. These are the observed data—not a theoretical model yet.</p>
+    <div class="scroll-table">
+      <table>
+        <thead><tr><th>Day</th><th>Orders received</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>0</td></tr><tr><td>2</td><td>1</td></tr>
+          <tr><td>3</td><td>2</td></tr><tr><td>4</td><td>2</td></tr>
+          <tr><td>5</td><td>2</td></tr><tr><td>6</td><td>3</td></tr>
+          <tr><td>7</td><td>3</td></tr><tr><td>8</td><td>3</td></tr>
+          <tr><td>9</td><td>4</td></tr><tr><td>10</td><td>5</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Let <strong>X = orders received in a randomly selected day</strong>. For these 10 observed days, estimate each probability by counting how many days had that outcome and dividing by 10.</p>
+    <div class="grid">
+      <div class="panel">
+        <h3>Observed frequency becomes probability</h3>
+        <div id="empiricalBars"></div>
+      </div>
+      <div class="panel">
+        <h3>Show the arithmetic</h3>
+        <div class="formula">P(X = 2) = days with 2 orders ÷ all observed days<br>= 3 ÷ 10 = 0.30 = 30%</div>
+        <div class="formula">P(X ≤ 2) = days with 0, 1, or 2 orders ÷ 10<br>= (1 + 1 + 3) ÷ 10 = 0.50 = 50%</div>
+        <p class="muted">The first is an exact-outcome probability. The second adds probabilities for all outcomes up to 2. This is the core idea behind a CDF.</p>
+      </div>
+    </div>
+    <div class="callout"><strong>Dataset limitation:</strong> 10 days is a tiny sample. The estimated 30% for exactly 2 orders is useful for intuition, but another 10-day sample could look different. A probability model can help smooth out this sampling noise and reason about outcomes not yet observed.</div>
+  </section>
+
+  <section id="pdf-cdf">
+    <span class="tag">Two ways to ask about probability</span>
+    <h2>PMF/PDF and CDF: exact value versus accumulated probability</h2>
+    <div class="grid">
+      <div>
+        <h3>Discrete outcomes: PMF</h3>
+        <p>For counts such as orders or defects, outcomes are separate whole numbers. The <strong>probability mass function (PMF)</strong> gives the probability of each exact value.</p>
+        <div class="formula">PMF: p(x) = P(X = x)</div>
+        <p>For the 10-day sample, <strong>p(3) = 3/10 = 0.30</strong>, because 3 orders occurred on 3 of the 10 days.</p>
+        <h3>Continuous outcomes: PDF</h3>
+        <p>For measurements such as delivery time, values can be any number in a range. A <strong>probability density function (PDF)</strong> describes density, not the probability of one exact point.</p>
+        <div class="formula">P(a ≤ X ≤ b) = area under the PDF from a to b</div>
+        <p>For a continuous variable, the probability of exactly one value is zero: <strong>P(X = 4.000...) = 0</strong>. A meaningful probability covers an interval, like delivery taking between 3 and 5 days.</p>
+      </div>
+      <div>
+        <h3>Cumulative distribution function</h3>
+        <p>The <strong>CDF</strong> adds probability from the far left up to a chosen value:</p>
+        <div class="formula">F(x) = P(X ≤ x)</div>
+        <p>For discrete orders, <strong>F(2) = P(X ≤ 2)</strong>. In our dataset that is 5/10 = 50%.</p>
+        <p>For a continuous distribution, the CDF is the area under the PDF to the left of x. To find a range probability:</p>
+        <div class="formula">P(a &lt; X ≤ b) = F(b) − F(a)</div>
+        <p class="muted">A useful mental picture: the PDF shows the shape of probability; the CDF is the running total as you move left to right.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="normal">
+    <span class="tag">Continuous distribution</span>
+    <h2>Normal distribution: the bell-shaped model</h2>
+    <p class="lead">The Normal distribution is a symmetric, continuous distribution centered at its mean. It is useful for quantities influenced by many small effects, such as measurement error, some delivery-time metrics, and dimensions.</p>
+    <div class="formula">
+      f(x) = [1 ÷ (σ√(2π))] × e<sup>−(x−μ)² ÷ (2σ²)</sup>
+      <small>μ = mean (center); σ = standard deviation (spread); variance = σ². The curve’s total area is 1.</small>
+    </div>
+    <div class="callout"><strong>Important:</strong> PDF height is density, not a probability. Probability is area over an interval. The curve’s height changes when the parameters change, but total area stays 1.</div>
+
+    <div class="grid">
+      <div class="panel">
+        <h3>Change the parameters</h3>
+        <div class="controls">
+          <div class="control">
+            <label for="mu">Mean μ <span class="value" id="muOut"></span></label>
+            <input id="mu" type="range" min="20" max="100" step="1" value="60">
+          </div>
+          <div class="control">
+            <label for="variance">Variance σ² <span class="value" id="varianceOut"></span></label>
+            <input id="variance" type="range" min="25" max="625" step="25" value="225">
+          </div>
+          <div class="control">
+            <label for="xPoint">Point x for PDF <span class="value" id="xOut"></span></label>
+            <input id="xPoint" type="range" min="0" max="120" step="1" value="75">
+          </div>
+          <div class="control">
+            <label for="rangeWidth">Interval half-width around μ <span class="value" id="widthOut"></span></label>
+            <input id="rangeWidth" type="range" min="5" max="40" step="1" value="15">
+          </div>
+        </div>
+        <p class="muted">Example context: delivery time in minutes. Try changing μ to move the center and variance to change spread.</p>
+      </div>
+
+      <div class="panel">
+        <h3>Live PDF formula substitution</h3>
+        <div class="formula" id="normalSubstitution"></div>
+        <p>At x = μ, the exponent is zero, so the PDF reaches its maximum:</p>
+        <div class="formula" id="normalAtMean"></div>
+        <h3>Probability over a range</h3>
+        <div class="formula" id="normalRangeFormula"></div>
+        <p><strong>Shaded interval probability:</strong> <span class="result" id="normalRangeResult"></span></p>
+        <p class="muted" id="normalRangeExplain"></p>
+      </div>
+    </div>
+    <div class="chart-wrap" style="margin-top:18px">
+      <canvas id="normalChart" aria-label="Normal distribution curve updated from the selected mean, variance, and interval"></canvas>
+    </div>
+    <div class="grid">
+      <div class="panel">
+        <h3>Why does the shape change?</h3>
+        <ul>
+          <li><strong>Change μ:</strong> the whole curve shifts left or right. The mean changes the center, not the basic shape.</li>
+          <li><strong>Increase variance:</strong> values are more spread out. The curve becomes wider and lower so its total area remains 1.</li>
+          <li><strong>Decrease variance:</strong> values cluster more tightly near the mean, making the curve narrower and taller.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>Expectation and variance</h3>
+        <div class="formula">E[X] = μ = <span id="normalExpected"></span><br>Var(X) = σ² = <span id="normalVar"></span><br>σ = √σ² = <span id="normalSd"></span></div>
+        <p>If delivery times follow this model, the expected delivery time is μ minutes. Variance is in squared minutes; standard deviation is easier to interpret in minutes.</p>
+      </div>
+    </div>
+    <p class="muted">The shaded probability is computed numerically from the Normal curve using Simpson’s rule, a standard numerical approximation to area. It updates with the sliders.</p>
+  </section>
+
+  <section id="binomial">
+    <span class="tag">Discrete distribution</span>
+    <h2>Binomial distribution: count successes in a fixed number of tries</h2>
+    <p class="lead">Use a Binomial model when there are a fixed number of trials, each trial has two outcomes (success/failure), the success probability stays the same, and trials are independent.</p>
+    <div class="formula">X ~ Binomial(n, p)<br>P(X = k) = C(n,k) p<sup>k</sup>(1−p)<sup>n−k</sup>
+      <small>n = number of trials; p = success probability per trial; k = successes. C(n,k) counts how many ways the k successes can occur.</small>
+    </div>
+    <div class="callout"><strong>Business example:</strong> 10 customers independently receive the same promotion. Each has a 20% chance to purchase. What is the probability exactly 3 purchase?</div>
+    <div class="grid">
+      <div class="panel">
+        <h3>Explore the parameters</h3>
+        <div class="controls">
+          <div class="control"><label for="binN">Trials n <span class="value" id="binNOut"></span></label><input id="binN" type="range" min="1" max="30" value="10"></div>
+          <div class="control"><label for="binP">Success probability p <span class="value" id="binPOut"></span></label><input id="binP" type="range" min="1" max="99" value="20"></div>
+          <div class="control"><label for="binK">Exact successes k <span class="value" id="binKOut"></span></label><input id="binK" type="range" min="0" max="30" value="3"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Worked PMF calculation</h3>
+        <div class="formula" id="binCalc"></div>
+        <p><strong>Exact probability:</strong> <span class="result" id="binResult"></span></p>
+        <p><strong>Expected successes:</strong> E[X] = np = <span id="binExpectation"></span></p>
+        <p><strong>Variance:</strong> Var(X) = np(1−p) = <span id="binVariance"></span></p>
+        <p><strong>Standard deviation:</strong> √Var(X) = <span id="binSD"></span></p>
+      </div>
+    </div>
+    <div class="grid">
+      <div class="panel"><h3>PMF: probability of each count</h3><div id="binBars"></div></div>
+      <div class="panel"><h3>CDF: probability of at most k successes</h3><div id="binCdf" class="formula"></div><p>The CDF adds PMF values from 0 through k. Use it for questions like “at most 3 purchases” or “no more than 3 defects.”</p></div>
+    </div>
+    <h3>Why does the Binomial shape change?</h3>
+    <ul>
+      <li>Increasing <strong>n</strong> increases the possible range from 0 to n. It also increases the expected count np.</li>
+      <li>Changing <strong>p</strong> shifts the likely counts: small p favors counts near 0; large p favors counts near n.</li>
+      <li>When p is near 0.5, the distribution tends to be more symmetric. Near 0 or 1, it tends to lean toward one end.</li>
+      <li>Spread is measured by np(1−p), so it depends on both the number of trials and success chance.</li>
+    </ul>
+  </section>
+
+  <section id="poisson">
+    <span class="tag">Discrete distribution</span>
+    <h2>Poisson distribution: count events in a fixed interval</h2>
+    <p class="lead">Use a Poisson model for counts of events in a specified time, area, distance, or volume when events occur independently at a roughly stable average rate.</p>
+    <div class="formula">X ~ Poisson(λ)<br>P(X = k) = e<sup>−λ</sup> λ<sup>k</sup> ÷ k!
+      <small>λ is the expected number of events in the interval. It is both the mean and the variance.</small>
+    </div>
+    <div class="callout"><strong>Business example:</strong> a support team receives an average of 4 urgent tickets per hour. What is the probability of exactly 2 tickets in the next hour?</div>
+    <div class="grid">
+      <div class="panel">
+        <h3>Explore the rate</h3>
+        <div class="controls">
+          <div class="control"><label for="lambda">Average events λ <span class="value" id="lambdaOut"></span></label><input id="lambda" type="range" min="0.5" max="12" step="0.5" value="4"></div>
+          <div class="control"><label for="poisK">Exact count k <span class="value" id="poisKOut"></span></label><input id="poisK" type="range" min="0" max="25" value="2"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Worked PMF calculation</h3>
+        <div class="formula" id="poisCalc"></div>
+        <p><strong>Exact probability:</strong> <span class="result" id="poisResult"></span></p>
+        <p><strong>Expected count:</strong> E[X] = λ = <span id="poisExpectation"></span></p>
+        <p><strong>Variance:</strong> Var(X) = λ = <span id="poisVariance"></span></p>
+        <p><strong>Standard deviation:</strong> √λ = <span id="poisSD"></span></p>
+      </div>
+    </div>
+    <div class="grid">
+      <div class="panel"><h3>PMF: probability of each count</h3><div id="poisBars"></div></div>
+      <div class="panel"><h3>CDF: probability of at most k events</h3><div id="poisCdf" class="formula"></div><p>The Poisson count range starts at 0 and has no fixed maximum. In practice, almost all probability is concentrated within a manageable range around λ.</p></div>
+    </div>
+    <h3>Why does the Poisson shape change?</h3>
+    <ul>
+      <li>λ is the average count and the center of the distribution. Raising λ shifts typical outcomes to larger counts.</li>
+      <li>Variance is also λ. A larger event rate means more absolute variation, so the distribution spreads out.</li>
+      <li>At small λ, counts cannot go below zero, so the shape is strongly right-skewed. At larger λ, it becomes more symmetric.</li>
+      <li>The interval matters: a rate of 4 per hour corresponds to an expected 2 per half-hour, assuming a stable rate.</li>
+    </ul>
+  </section>
+
+  <section id="choose">
+    <span class="tag">Applied statistics</span>
+    <h2>Choosing the right distribution for a business problem</h2>
+    <p class="lead">Start with the outcome and the process that generates it. The context tells you which model assumptions are reasonable.</p>
+    <div class="grid">
+      <div class="panel">
+        <h3>Quick decision guide</h3>
+        <table>
+          <thead><tr><th>Business question</th><th>Candidate model</th><th>Why</th></tr></thead>
+          <tbody>
+            <tr><td>What share of 20 contacted leads convert?</td><td>Binomial</td><td>Fixed number of yes/no trials</td></tr>
+            <tr><td>How many support tickets arrive this hour?</td><td>Poisson</td><td>Count events in a fixed interval</td></tr>
+            <tr><td>How variable are package weights?</td><td>Normal</td><td>Continuous measurement, often roughly symmetric</td></tr>
+            <tr><td>What is the chance delivery takes between 2 and 4 days?</td><td>Normal, if justified</td><td>Continuous interval probability from area/CDF</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="panel">
+        <h3>Choose a scenario</h3>
+        <div class="button-row">
+          <button class="scenario active" data-scenario="conversion">Campaign conversions</button>
+          <button class="scenario" data-scenario="tickets">Hourly tickets</button>
+          <button class="scenario" data-scenario="weights">Package weights</button>
+        </div>
+        <div id="scenarioAnswer" class="callout"></div>
+      </div>
+    </div>
+    <h3>Ask these questions before choosing</h3>
+    <ol>
+      <li><strong>What is the variable?</strong> A count, a yes/no outcome, or a continuous measurement?</li>
+      <li><strong>Is the number of trials fixed?</strong> If yes, and each trial is independent with the same success chance, consider Binomial.</li>
+      <li><strong>Are you counting events across a time/space interval?</strong> If the average rate is stable and events are independent, consider Poisson.</li>
+      <li><strong>Is it a continuous measurement with a roughly symmetric, bell-like pattern?</strong> A Normal model may be useful; check data and context rather than assuming.</li>
+      <li><strong>Do the assumptions fit?</strong> Strong seasonality, changing success probabilities, clustering, hard limits, or skew can make these models a poor fit.</li>
+    </ol>
+    <div class="callout"><strong>Model, not magic:</strong> a distribution is a simplifying description. Use historical data, check assumptions, and compare predictions with actual outcomes before relying on it for staffing, inventory, or service promises.</div>
+  </section>
+
+  <section id="quiz">
+    <span class="tag">Quick check</span>
+    <h2>Test your intuition</h2>
+    <p id="quizQuestion"><strong>A store contacts 12 customers. Each independently has a 10% chance of purchasing. Which distribution models the number of purchases?</strong></p>
+    <button class="quiz-option" data-correct="false">Normal</button>
+    <button class="quiz-option" data-correct="true">Binomial</button>
+    <button class="quiz-option" data-correct="false">Poisson, automatically</button>
+    <div class="feedback" id="quizFeedback" aria-live="polite"></div>
+  </section>
+  <div class="footer">Chapter 2 · Probability distributions · Change the controls and watch the calculations and shapes respond.</div>
+</main>
+
+<script>
+  const $ = id => document.getElementById(id);
+  const fmt = (x, digits = 4) => Number(x).toLocaleString(undefined, {
+    maximumFractionDigits: digits,
+    minimumFractionDigits: 0
+  });
+  const pct = x => (100 * x).toFixed(2) + "%";
+
+  // Empirical distribution from the ten observed days.
+  const orderData = [0,1,2,2,2,3,3,3,4,5];
+  const orderCounts = new Map();
+  orderData.forEach(x => orderCounts.set(x, (orderCounts.get(x) || 0) + 1));
+  $("empiricalBars").innerHTML = [...orderCounts.entries()].map(([x,n]) => `
+    <div class="bar-row">
+      <strong>${x} orders</strong>
+      <div class="bar-track"><div class="bar-fill" style="width:${n / orderData.length * 100}%"></div></div>
+      <span>${n}/10 = ${pct(n / 10)}</span>
+    </div>`).join("");
+
+  // Normal numerical PDF and CDF.
+  function normalPdf(x, mu, sigma) {
+    return Math.exp(-0.5 * ((x - mu) / sigma) ** 2) / (sigma * Math.sqrt(2 * Math.PI));
+  }
+  function simpson(f, a, b, n = 600) {
+    if (a === b) return 0;
+    if (b < a) return -simpson(f, b, a, n);
+    if (n % 2) n++;
+    const h = (b - a) / n;
+    let s = f(a) + f(b);
+    for (let i = 1; i < n; i++) s += (i % 2 ? 4 : 2) * f(a + i * h);
+    return s * h / 3;
+  }
+  function drawNormal() {
+    const mu = +$("mu").value;
+    const variance = +$("variance").value;
+    const sigma = Math.sqrt(variance);
+    const x = +$("xPoint").value;
+    const w = +$("rangeWidth").value;
+    const lo = mu - w, hi = mu + w;
+    const density = normalPdf(x, mu, sigma);
+    const atMean = normalPdf(mu, mu, sigma);
+    const area = simpson(t => normalPdf(t, mu, sigma), lo, hi);
+
+    $("muOut").textContent = mu + " min";
+    $("varianceOut").textContent = variance + " min²";
+    $("xOut").textContent = x + " min";
+    $("widthOut").textContent = "±" + w + " min";
+    $("normalExpected").textContent = mu + " min";
+    $("normalVar").textContent = variance + " min²";
+    $("normalSd").textContent = fmt(sigma, 2) + " min";
+
+    $("normalSubstitution").innerHTML =
+      `f(${x}) = [1 ÷ (${fmt(sigma,3)}√(2π))] × ` +
+      `e<sup>−(${x}−${mu})² ÷ (2×${variance})</sup>` +
+      `<small>μ = ${mu}, σ² = ${variance}, σ = √${variance} = ${fmt(sigma,3)}. ` +
+      `Substitution gives f(${x}) = ${fmt(density,6)} per minute.</small>`;
+
+    $("normalAtMean").innerHTML =
+      `f(μ) = 1 ÷ (σ√(2π)) = 1 ÷ (${fmt(sigma,3)} × √(2π)) = ${fmt(atMean,6)} per minute`;
+
+    $("normalRangeFormula").innerHTML =
+      `P(${lo} ≤ X ≤ ${hi}) = ∫<sub>${lo}</sub><sup>${hi}</sup> f(x) dx`;
+    $("normalRangeResult").textContent = pct(area);
+    $("normalRangeExplain").textContent =
+      `This is the area under the curve from ${lo} to ${hi} minutes. The interval is centered on μ; its width is ±${w} minutes.`;
+
+    drawNormalCanvas(mu, sigma, lo, hi);
+  }
+
+  function drawNormalCanvas(mu, sigma, lo, hi) {
+    const canvas = $("normalChart");
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.max(1, Math.round(rect.width * dpr));
+    canvas.height = Math.max(1, Math.round(rect.height * dpr));
+    const ctx = canvas.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const W = rect.width, H = rect.height;
+    const pad = {l: 48, r: 18, t: 20, b: 38};
+    const xMin = Math.min(0, mu - 4 * sigma);
+    const xMax = Math.max(120, mu + 4 * sigma);
+    const yMax = normalPdf(mu, mu, sigma) * 1.18;
+    const px = x => pad.l + (x - xMin) / (xMax - xMin) * (W - pad.l - pad.r);
+    const py = y => H - pad.b - y / yMax * (H - pad.t - pad.b);
+
+    ctx.clearRect(0, 0, W, H);
+    ctx.font = "12px Trebuchet MS, Arial";
+    ctx.strokeStyle = "#d7e3e2";
+    ctx.fillStyle = "#5f747c";
+    ctx.lineWidth = 1;
+
+    for (let i = 0; i <= 4; i++) {
+      const y = pad.t + i * (H - pad.t - pad.b) / 4;
+      ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(W - pad.r, y); ctx.stroke();
+      const value = yMax * (1 - i / 4);
+      ctx.fillText(value.toFixed(3), 2, y + 4);
+    }
+    for (let i = 0; i <= 6; i++) {
+      const xv = xMin + i * (xMax - xMin) / 6;
+      const xx = px(xv);
+      ctx.beginPath(); ctx.moveTo(xx, pad.t); ctx.lineTo(xx, H - pad.b); ctx.stroke();
+      ctx.fillText(xv.toFixed(0), xx - 8, H - 13);
+    }
+
+    // Shade interval area under density curve.
+    ctx.beginPath();
+    ctx.moveTo(px(lo), py(0));
+    const steps = 240;
+    for (let i = 0; i <= steps; i++) {
+      const xv = lo + (hi - lo) * i / steps;
+      ctx.lineTo(px(xv), py(normalPdf(xv, mu, sigma)));
+    }
+    ctx.lineTo(px(hi), py(0));
+    ctx.closePath();
+    ctx.fillStyle = "rgba(69,182,189,.30)";
+    ctx.fill();
+
+    // Draw curve.
+    ctx.beginPath();
+    for (let i = 0; i <= 500; i++) {
+      const xv = xMin + (xMax - xMin) * i / 500;
+      const yy = py(normalPdf(xv, mu, sigma));
+      if (i === 0) ctx.moveTo(px(xv), yy); else ctx.lineTo(px(xv), yy);
+    }
+    ctx.strokeStyle = "#176b87";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // Mean and interval boundary guides.
+    ctx.setLineDash([5,4]);
+    ctx.strokeStyle = "#eb7657";
+    [mu, lo, hi].forEach(v => {
+      ctx.beginPath(); ctx.moveTo(px(v), pad.t); ctx.lineTo(px(v), H - pad.b); ctx.stroke();
+    });
+    ctx.setLineDash([]);
+    ctx.fillStyle = "#17313e";
+    ctx.fillText("delivery time (minutes)", Math.max(pad.l, W/2 - 65), H - 1);
+    ctx.fillStyle = "#eb7657";
+    ctx.fillText("μ", px(mu) + 4, pad.t + 12);
+  }
+
+  ["mu","variance","xPoint","rangeWidth"].forEach(id => $(id).addEventListener("input", drawNormal));
+  window.addEventListener("resize", drawNormal);
+  drawNormal();
+
+  // Discrete distribution utilities.
+  function choose(n,k) {
+    if (k < 0 || k > n) return 0;
+    k = Math.min(k, n-k);
+    let r = 1;
+    for (let i = 1; i <= k; i++) r = r * (n - k + i) / i;
+    return r;
+  }
+  function binPmf(n,p,k) {
+    if (k < 0 || k > n) return 0;
+    return choose(n,k) * Math.pow(p,k) * Math.pow(1-p,n-k);
+  }
+  function poissonPmf(lambda,k) {
+    if (k < 0) return 0;
+    let fact = 1;
+    for (let i=2; i<=k; i++) fact *= i;
+    return Math.exp(-lambda) * Math.pow(lambda,k) / fact;
+  }
+  function renderBars(containerId, values, selected, maxItems=30) {
+    const max = Math.max(...values.map(d => d.p), 0.000001);
+    $(containerId).innerHTML = values.slice(0,maxItems).map(d => `
+      <div class="bar-row">
+        <strong>${d.k}</strong>
+        <div class="bar-track"><div class="bar-fill" style="width:${Math.max(0,d.p/max*100)}%;background:${d.k===selected ? "#eb7657" : "#45b6bd"}"></div></div>
+        <span>${pct(d.p)}</span>
+      </div>`).join("");
+  }
+
+  function updateBinomial() {
+    const n = +$("binN").value;
+    const p = +$("binP").value / 100;
+    const kEl = $("binK");
+    kEl.max = n;
+    if (+kEl.value > n) kEl.value = n;
+    const k = +kEl.value;
+    const probability = binPmf(n,p,k);
+    const cdf = Array.from({length:k+1},(_,i)=>binPmf(n,p,i)).reduce((a,b)=>a+b,0);
+    const variance = n*p*(1-p);
+
+    $("binNOut").textContent = n;
+    $("binPOut").textContent = pct(p);
+    $("binKOut").textContent = k;
+    $("binCalc").innerHTML =
+      `P(X=${k}) = C(${n},${k}) × ${p.toFixed(2)}<sup>${k}</sup> × ` +
+      `${(1-p).toFixed(2)}<sup>${n-k}</sup><br>` +
+      `= ${fmt(choose(n,k),0)} × ${fmt(Math.pow(p,k),7)} × ${fmt(Math.pow(1-p,n-k),7)}` +
+      `<small>There are C(${n},${k}) = ${fmt(choose(n,k),0)} ways to choose which ${k} trials succeed.</small>`;
+    $("binResult").textContent = pct(probability);
+    $("binExpectation").textContent = `${n} × ${p.toFixed(2)} = ${fmt(n*p,3)} successes`;
+    $("binVariance").textContent = `${n} × ${p.toFixed(2)} × ${(1-p).toFixed(2)} = ${fmt(variance,3)} successes²`;
+    $("binSD").textContent = fmt(Math.sqrt(variance),3) + " successes";
+    $("binCdf").innerHTML =
+      `P(X ≤ ${k}) = Σ<sub>j=0</sub><sup>${k}</sup> C(${n},j) ${p.toFixed(2)}<sup>j</sup> ${ (1-p).toFixed(2)}<sup>${n}−j</sup> = ${pct(cdf)}`;
+    renderBars("binBars", Array.from({length:n+1},(_,i)=>({k:i,p:binPmf(n,p,i)})), k);
+  }
+  ["binN","binP","binK"].forEach(id => $(id).addEventListener("input", updateBinomial));
+  updateBinomial();
+
+  function updatePoisson() {
+    const lambda = +$("lambda").value;
+    const k = +$("poisK").value;
+    const probability = poissonPmf(lambda,k);
+    const cdf = Array.from({length:k+1},(_,i)=>poissonPmf(lambda,i)).reduce((a,b)=>a+b,0);
+    $("lambdaOut").textContent = lambda;
+    $("poisKOut").textContent = k;
+    $("poisCalc").innerHTML =
+      `P(X=${k}) = e<sup>−${lambda}</sup> × ${lambda}<sup>${k}</sup> ÷ ${k}!` +
+      `<br>= ${fmt(Math.exp(-lambda),7)} × ${fmt(Math.pow(lambda,k),7)} ÷ ${fmt(factorial(k),0)}` +
+      `<small>λ = ${lambda} expected tickets per hour; ${k}! = ${factorial(k)}.</small>`;
+    $("poisResult").textContent = pct(probability);
+    $("poisExpectation").textContent = lambda + " tickets";
+    $("poisVariance").textContent = lambda + " tickets²";
+    $("poisSD").textContent = fmt(Math.sqrt(lambda),3) + " tickets";
+    $("poisCdf").innerHTML =
+      `P(X ≤ ${k}) = Σ<sub>j=0</sub><sup>${k}</sup> e<sup>−${lambda}</sup>${lambda}<sup>j</sup> ÷ j! = ${pct(cdf)}`;
+
+    const maxK = Math.max(10, Math.ceil(lambda + 4*Math.sqrt(lambda)));
+    renderBars("poisBars", Array.from({length:maxK+1},(_,i)=>({k:i,p:poissonPmf(lambda,i)})), k);
+  }
+  function factorial(n) {
+    let r=1;
+    for(let i=2;i<=n;i++) r*=i;
+    return r;
+  }
+  ["lambda","poisK"].forEach(id => $(id).addEventListener("input", updatePoisson));
+  updatePoisson();
+
+  const scenarios = {
+    conversion: "<strong>Campaign conversions:</strong> 12 fixed contacts; each either purchases or does not; assume independent and the same purchase probability. Start with a Binomial model.",
+    tickets: "<strong>Hourly tickets:</strong> count events arriving during a fixed hour. If arrivals are independent and the average rate is stable, start with a Poisson model.",
+    weights: "<strong>Package weights:</strong> a continuous measurement. If historical weights are roughly symmetric and bell-shaped, a Normal model may be reasonable."
+  };
+  document.querySelectorAll(".scenario").forEach(button => {
+    button.addEventListener("click", () => {
+      document.querySelectorAll(".scenario").forEach(b => b.classList.remove("active"));
+      button.classList.add("active");
+      $("scenarioAnswer").innerHTML = scenarios[button.dataset.scenario];
+    });
+  });
+  $("scenarioAnswer").innerHTML = scenarios.conversion;
+
+  document.querySelectorAll(".quiz-option").forEach(button => {
+    button.addEventListener("click", () => {
+      const correct = button.dataset.correct === "true";
+      $("quizFeedback").textContent = correct
+        ? "Correct. There is a fixed number of independent yes/no trials with the same success chance."
+        : "Not quite. Look for the fixed number of independent yes/no trials.";
+      $("quizFeedback").className = "feedback " + (correct ? "good" : "bad");
+    });
+  });
+</script>
+</body>
+</html>
